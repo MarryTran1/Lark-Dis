@@ -1,0 +1,102 @@
+:root {
+    --background-color: #121212;
+    --card-color: #1e1e1e;
+    --text-color: #e0e0e0;
+    --primary-color: #bb86fc;
+    --green-color: #03dac6;
+    --red-color: #cf6679;
+}
+
+body {
+    margin: 0;
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.container {
+    text-align: center;
+}
+
+.status-card {
+    background-color: var(--card-color);
+    padding: 40px 50px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    border: 1px solid #333;
+}
+
+.robot-icon {
+    font-size: 60px;
+    margin-bottom: 20px;
+}
+
+h1 {
+    margin: 0;
+    color: var(--primary-color);
+    font-weight: 700;
+}
+
+p {
+    font-weight: 300;
+    color: #a0a0a0;
+}
+
+.status-indicator {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 30px;
+    padding: 10px;
+    background-color: #2a2a2a;
+    border-radius: 8px;
+}
+
+.status-dot {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    margin-right: 12px;
+    background-color: #555; /* Default: checking */
+    animation: pulse 2s infinite;
+}
+
+.status-dot.online {
+    background-color: var(--green-color);
+    animation: pulse-green 2s infinite;
+}
+
+.status-dot.offline {
+    background-color: var(--red-color);
+    animation: none;
+}
+
+#status-text {
+    font-weight: 400;
+    font-size: 1.1em;
+}
+
+footer {
+    margin-top: 30px;
+    font-size: 0.9em;
+    color: #666;
+}
+
+footer a {
+    color: #888;
+    text-decoration: none;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+
+@keyframes pulse-green {
+    0% { box-shadow: 0 0 0 0 rgba(3, 218, 198, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(3, 218, 198, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(3, 218, 198, 0); }
+}
