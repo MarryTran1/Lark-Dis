@@ -4,7 +4,7 @@ const app = express();
 
 app.use(express.json()); // Đảm bảo phân tích JSON body
 
-app.post('/your-webhook-endpoint', (req, res) => {
+app.post('/events', (req, res) => {
     const { type, token, challenge } = req.body;
 
     // Kiểm tra xem có phải yêu cầu xác minh URL không
