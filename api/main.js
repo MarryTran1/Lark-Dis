@@ -1,86 +1,21 @@
 // file: api/main.js
 const express = require('express');
-const axios = require('axios');
-const { sendMessageToLark } = require('./lark_handler');
-const { getGeminiResponse } = require('./gemini_handler');
-
 const app = express();
-// Middleware để parse JSON body cho tất cả các request
-app.use(express.json()); 
 
-const LARK_VERIFICATION_TOKEN = process.env.LARK_VERIFICATION_TOKEN;
-const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
+app.use(express.json()); // Đảm bảo phân tích JSON body
 
-async function sendLogToDiscord(senderName, question, answer) {
-    if (!DISCORD_WEBHOOK_URL) {
-        console.error("Lỗi: DISCORD_WEBHOOK_URL chưa được thiết lập.");
-        return;
+app.post('/your-webhook-endpoint', (req, res) => {
+    const { type, token, challenge } = req.body;
+
+    // Kiểm tra xem có phải yêu cầu xác minh URL không
+    if (type === 'url_verification') {
+        return res.status(200).json({ challenge });
     }
-    const embed = {
-        author: { name: `${senderName} (đã hỏi từ Larksuite)` },
-        title: "Câu hỏi",
-        description: question,
-        color: 3447003, // Màu xanh dương
-        fields: [{ name: "Câu trả lời từ Gemini AI", value: answer }],
-    };
-    const payload = {
-        username: "Trợ lý ChatAI",
-        avatar_url: "https://i.imgur.com/fKL31aD.png",
-        embeds: [embed],
-    };
-    try {
-        await axios.post(DISCORD_WEBHOOK_URL, payload);
-        console.log("Đã gửi log thành công đến Discord.");
-    } catch (error) {
-        console.error("Lỗi khi gửi log đến Discord:", error.message);
-    }
-}
 
-// THÊM ĐOẠN NÀY VÀO
-app.get("/api/status", (req, res) => {
-    res.status(200).json({ status: "ok" });
+    // Mặc định phản hồi nếu không phải loại này
+    return res.status(400).json({ error: 'Invalid request type' });
 });
 
-app.post("/api/lark-events", async (req, res) => {
-    const data = req.body;
-
-    // Xử lý xác thực URL của Lark
-    if (data.type === "url_verification") {
-        if (data.token !== LARK_VERIFICATION_TOKEN) {
-            return res.status(403).json({ error: "Token xác thực không hợp lệ." });
-        }
-        return res.json({ challenge: data.challenge });
-    }
-
-    // Xử lý các sự kiện tin nhắn
-    if (data.header?.token !== LARK_VERIFICATION_TOKEN) {
-        return res.status(403).json({ error: "Token sự kiện không hợp lệ." });
-    }
-    
-    // Phản hồi ngay lập tức cho Lark để tránh timeout
-    res.status(200).json({});
-
-    if (data.header?.event_type === "im.message.receive_v1") {
-        const { event } = data;
-        const { sender, message } = event;
-
-        if (sender?.sender_type === "bot" || message?.message_type !== "text") {
-            return; // Bỏ qua nếu là bot hoặc không phải tin nhắn text
-        }
-
-        const chatId = message.chat_id;
-        const messageText = JSON.parse(message.content || "{}").text || "";
-        const senderId = sender.sender_id;
-        const senderName = `User ${senderId?.user_id || senderId?.open_id}`;
-
-        if (!messageText) return;
-
-        // Xử lý logic chính
-        const aiResponse = await getGeminiResponse(chatId, messageText);
-        await sendMessageToLark(chatId, aiResponse);
-        await sendLogToDiscord(senderName, messageText, aiResponse);
-    }
+app.listen(3000, () => {
+    console.log('Webhook server is running on port 3000');
 });
-
-// Xuất app để Vercel có thể sử dụng
-module.exports = app;
