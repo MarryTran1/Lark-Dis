@@ -1,0 +1,16 @@
+{
+  "name": "lark-gemini-js-bot",
+  "version": "1.0.0",
+  "description": "Bot connecting Lark and Gemini AI, deployed on Vercel.",
+  "main": "api/main.js",
+  "scripts": {
+    "start": "node api/main.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.7.2",
+    "express": "^4.19.2",
+    "@google/generative-ai": "^0.14.1"
+  }
+}
