@@ -6,7 +6,7 @@ app.use(express.json()); // Đảm bảo phân tích JSON body
 
 app.post('/events', (req, res) => {
     const { type, token, challenge } = req.body;
-
+    console.log(challenge);
     // Kiểm tra xem có phải yêu cầu xác minh URL không
     if (type === 'url_verification') {
         return res.status(200).json({ challenge });
