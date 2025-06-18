@@ -26,11 +26,14 @@ module.exports = async (req, res) => {
         }
 
         // 2. Kiểm tra token trong header sự kiện
-        console.log("🧪 Token từ Lark:", data.header?.token);
+        console.log("🧪 Dữ liệu webhook nhận từ Lark:", JSON.stringify(data, null, 2));
         console.log("🔐 Token hệ thống:", LARK_VERIFICATION_TOKEN);
 
-        if (data.header?.token !== LARK_VERIFICATION_TOKEN) {
-            return res.status(403).json({ error: "Token sự kiện không hợp lệ." });
+        const tokenFromLark = data.token || data.header?.token;
+
+        if (tokenFromLark !== LARK_VERIFICATION_TOKEN) {
+        console.warn("⚠️ Token từ Lark sai hoặc thiếu:", tokenFromLark);
+        return res.status(403).json({ error: "Token sự kiện không hợp lệ." });
         }
 
         // 3. Trả lời ngay tránh timeout
