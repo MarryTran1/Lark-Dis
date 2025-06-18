@@ -48,10 +48,15 @@ module.exports = async (req, res) => {
         return res.status(200).json({ status: "empty message" });
       }
 
-      // Gửi sang Discord
+      // Gửi sang Discord (JSON string để bot parse)
+      const content = JSON.stringify({
+        fromLark: true,
+        chatId,
+        text: messageText
+      });
+
       if (DISCORD_BOT_TOKEN && DISCORD_CHANNEL_ID) {
         try {
-          const content = `📨 Từ ${senderName} (Lark): ${messageText}`;
           await axios.post(
             `https://discord.com/api/channels/${DISCORD_CHANNEL_ID}/messages`,
             { content },

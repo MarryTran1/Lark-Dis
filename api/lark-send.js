@@ -11,6 +11,7 @@ module.exports = async (req, res) => {
     return res.status(200).json({ status: "Sent to Lark" });
   } catch (err) {
     console.error("❌ Gửi Lark lỗi:", err.message);
+    console.error(err.response?.data);
     return res.status(500).json({ error: "Gửi Lark thất bại" });
   }
 };

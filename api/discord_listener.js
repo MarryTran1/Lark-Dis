@@ -13,7 +13,6 @@ const client = new Client({
 
 const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 const LARK_FORWARD_ENDPOINT = process.env.LARK_FORWARD_ENDPOINT;
-const DEFAULT_CHAT_ID = process.env.DEFAULT_LARK_CHAT_ID; // Tạm thời gán mặc định
 
 client.once('ready', () => {
   console.log(`🤖 Bot Discord đã sẵn sàng: ${client.user.tag}`);
@@ -22,25 +21,36 @@ client.once('ready', () => {
 client.on('messageCreate', async (message) => {
   if (message.author.bot) return;
 
-  const userMessage = message.content.trim();
+  let parsed;
+  try {
+    parsed = JSON.parse(message.content);
+  } catch {
+    return;
+  }
+
+  if (!parsed.fromLark || !parsed.chatId || !parsed.text) return;
+
+  const chatId = parsed.chatId;
+  const prompt = parsed.text;
   const senderName = message.author.username;
 
   try {
-    const aiResponse = await getGeminiResponse(message.id, userMessage);
+    const aiResponse = await getGeminiResponse(message.id, prompt);
 
     await message.reply(`🤖 ${aiResponse}`);
+    console.log("✅ Trả lời trong Discord");
 
-    if (LARK_FORWARD_ENDPOINT && DEFAULT_CHAT_ID) {
-      await axios.post(LARK_FORWARD_ENDPOINT, {
+    if (LARK_FORWARD_ENDPOINT) {
+      const res = await axios.post(LARK_FORWARD_ENDPOINT, {
         message: aiResponse,
-        chat_id: DEFAULT_CHAT_ID
+        chat_id: chatId
       });
-      console.log("✅ Đã gửi trả lời về Lark");
+      console.log("📤 Gửi trả lời về Lark OK", res.status);
     } else {
-      console.warn("⚠️ Thiếu endpoint hoặc chat_id");
+      console.warn("⚠️ Thiếu LARK_FORWARD_ENDPOINT");
     }
   } catch (err) {
-    console.error("❌ Lỗi xử lý Discord:", err.message);
+    console.error("❌ Lỗi Discord Bot:", err.message);
     console.error(err.response?.data);
   }
 });
