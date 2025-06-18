@@ -48,9 +48,17 @@ module.exports = async (req, res) => {
             await sendMessageToLark(chatId, aiResponse);
 
             if (DISCORD_WEBHOOK_URL) {
-                await axios.post(DISCORD_WEBHOOK_URL, {
-                    content: `📥 ${senderName} hỏi: ${messageText}\n💬 Trả lời: ${aiResponse}`
-                });
+                try {
+                    await axios.post(DISCORD_WEBHOOK_URL, {
+                        content: `📥 ${senderName} hỏi: ${messageText}\n💬 Trả lời: ${aiResponse}`
+                    });
+                    console.log("✅ Đã gửi log thành công đến Discord.");
+                } catch (err) {
+                    console.error("❌ Gửi Discord lỗi:", err.message);
+                    console.error(err.response?.data); // thêm nếu có lỗi từ API Discord
+                }
+            } else {
+                console.warn("⚠️ DISCORD_WEBHOOK_URL chưa được cấu hình!");
             }
         }
     } catch (err) {
